@@ -5,6 +5,12 @@ const scoreElement = document.getElementById('score');
 const livesElement = document.getElementById('lives');
 const levelElement = document.getElementById('level');
 
+// 🎵 Sonidos
+const soundBounce = document.getElementById('soundBounce');
+const soundBrick = document.getElementById('soundBrick');
+const soundLose = document.getElementById('soundLose');
+const soundWin = document.getElementById('soundWin');
+
 // Configuración inicial
 let score = 0;
 let lives = 3;
@@ -44,12 +50,14 @@ const brick = {
 
 let bricks = [];
 
+const brickColors = ["yellow", "orange", "green", "blue", "red"];
+
 function initBricks() {
     bricks = [];
     for (let r = 0; r < brick.row; r++) {
         bricks[r] = [];
         for (let c = 0; c < brick.col; c++) {
-            bricks[r][c] = { x: 0, y: 0, status: 1 };
+            bricks[r][c] = { x: 0, y: 0, status: 1, color: brickColors[r] };
         }
     }
 }
@@ -58,7 +66,7 @@ initBricks();
 
 // Dibujar pala
 function drawPaddle() {
-    ctx.fillStyle = 'blue';
+    ctx.fillStyle = 'cyan';
     ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
 }
 
@@ -80,7 +88,7 @@ function drawBricks() {
                 let brickY = r * (brick.height + brick.padding) + brick.offsetTop;
                 bricks[r][c].x = brickX;
                 bricks[r][c].y = brickY;
-                ctx.fillStyle = 'red';
+                ctx.fillStyle = bricks[r][c].color;
                 ctx.fillRect(brickX, brickY, brick.width, brick.height);
             }
         }
@@ -119,6 +127,8 @@ function collisionBricks() {
                     b.status = 0;
                     score += 10;
                     scoreElement.textContent = `Puntuación: ${score}`;
+                    soundBrick.currentTime = 0;
+                    soundBrick.play();
                 }
             }
         }
@@ -144,15 +154,22 @@ function moveBall() {
     // Paredes
     if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
         ball.dx *= -1;
+        soundBounce.currentTime = 0;
+        soundBounce.play();
     }
     if (ball.y - ball.radius < 0) {
         ball.dy *= -1;
+        soundBounce.currentTime = 0;
+        soundBounce.play();
     }
 
     // Fondo
     if (ball.y + ball.radius > canvas.height) {
         lives--;
         livesElement.textContent = `Vidas: ${lives}`;
+        soundLose.currentTime = 0;
+        soundLose.play();
+
         if (lives === 0) {
             alert("¡Has perdido todas las vidas!");
             lives = 3;
@@ -165,7 +182,7 @@ function moveBall() {
             initBricks();
         }
         resetBallAndPaddle();
-        initBricks(); // reiniciar ladrillos al perder vida
+        initBricks();
     }
 
     // Pala
@@ -176,6 +193,8 @@ function moveBall() {
     ) {
         ball.dy *= -1;
         ball.y = paddle.y - ball.radius;
+        soundBounce.currentTime = 0;
+        soundBounce.play();
     }
 
     collisionBricks();
@@ -189,6 +208,8 @@ function moveBall() {
             levelElement.textContent = `Nivel: ${level}`;
             resetBallAndPaddle();
             initBricks();
+            soundWin.currentTime = 0;
+            soundWin.play();
         } else {
             alert("¡Ganaste el juego!");
             level = 1;
@@ -198,6 +219,8 @@ function moveBall() {
             score = 0;
             scoreElement.textContent = `Puntuación: ${score}`;
             levelElement.textContent = `Nivel: ${level}`;
+            soundWin.currentTime = 0;
+            soundWin.play();
         }
     }
 }
