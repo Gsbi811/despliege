@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini Arkanoid</title>
-<link rel="stylesheet" href="style.css">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Billar Mini</title>
+<link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div id="info">
-    <span id="score">Puntuación: 0</span>
-    <span id="lives">Vidas: 3</span>
-    <span id="level">Nivel: 1</span>
-</div>
-<canvas id="gameCanvas" width="600" height="400"></canvas>
+  <div id="ui">
+    <h1>Billar Mini</h1>
+    <div class="stats">
+      <div>Bolas embocadas: <span id="potted">0</span></div>
+      <div><button id="btnRestart">Reiniciar</button></div>
+    </div>
+    <p class="hint">Haz click sobre la bola blanca, arrastra para apuntar y suelta para disparar.</p>
+  </div>
 
-<!-- 🎵 Sonidos -->
-<audio id="soundBounce" src="sounds/bounce.wav"></audio>
-<audio id="soundBrick" src="sounds/brick.wav"></audio>
-<audio id="soundLose" src="sounds/lose.wav"></audio>
-<audio id="soundWin" src="sounds/win.wav"></audio>
+  <canvas id="table" width="900" height="500"></canvas>
 
 <script src="script.js"></script>
 </body>

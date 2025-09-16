@@ -1,25 +1,15 @@
-body { 
-    display: flex; 
-    flex-direction: column;
-    align-items: center; 
-    justify-content: flex-start;
-    height: 100vh; 
-    background: #000; 
-    margin: 0; 
-    color: #fff;
-    font-family: Arial, sans-serif;
-}
-
-#info {
+body {
     display: flex;
-    justify-content: space-between;
-    width: 600px;
-    margin: 10px 0;
-    font-size: 18px;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #064420; /* verde de fondo */
+    margin: 0;
 }
 
-canvas { 
-    background: #111; 
-    display: block; 
-    border: 2px solid #fff; 
+canvas {
+    background: #0b6623; /* verde mesa */
+    border: 8px solid #4b3621; /* borde marrón madera */
+    border-radius: 15px;
+    display: block;
 }
