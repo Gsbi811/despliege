@@ -165,6 +165,7 @@ function moveBall() {
             initBricks();
         }
         resetBallAndPaddle();
+        initBricks(); // reiniciar ladrillos al perder vida
     }
 
     // Pala

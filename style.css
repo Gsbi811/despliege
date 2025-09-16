@@ -2,7 +2,7 @@ body {
     display: flex; 
     flex-direction: column;
     align-items: center; 
-    justify-content: center; 
+    justify-content: flex-start; /* la info arriba */
     height: 100vh; 
     background: #000; 
     margin: 0; 
@@ -14,7 +14,8 @@ body {
     display: flex;
     justify-content: space-between;
     width: 600px;
-    margin-bottom: 5px;
+    margin: 10px 0;
+    font-size: 18px;
 }
 
 canvas { 
