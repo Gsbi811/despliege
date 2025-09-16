@@ -1,6 +1,10 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Configuración de niveles
+let level = 1;
+let maxLevels = 3;
+
 // Pala
 const paddle = {
     width: 100,
@@ -16,9 +20,9 @@ const ball = {
     x: canvas.width/2,
     y: canvas.height/2,
     radius: 8,
-    speed: 4,
-    dx: 4,
-    dy: -4
+    speed: 2, // velocidad inicial más baja
+    dx: 2,
+    dy: -2
 };
 
 // Ladrillos
@@ -31,14 +35,20 @@ const brick = {
     offsetTop: 30,
     offsetLeft: 10
 };
+
 let bricks = [];
 
-for(let r=0; r<brick.row; r++){
-    bricks[r] = [];
-    for(let c=0; c<brick.col; c++){
-        bricks[r][c] = { x: 0, y: 0, status: 1 };
+// Inicializar ladrillos
+function initBricks() {
+    bricks = [];
+    for(let r=0; r<brick.row; r++){
+        bricks[r] = [];
+        for(let c=0; c<brick.col; c++){
+            bricks[r][c] = { x: 0, y: 0, status: 1 };
+        }
     }
 }
+initBricks();
 
 // Dibujar pala
 function drawPaddle(){
@@ -78,6 +88,43 @@ function movePaddle(){
     if(paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
 }
 
+// Reiniciar pelota y pala
+function resetBallAndPaddle() {
+    ball.x = canvas.width/2;
+    ball.y = canvas.height/2;
+    ball.dx = ball.speed;
+    ball.dy = -ball.speed;
+    paddle.x = canvas.width/2 - paddle.width/2;
+}
+
+// Comprobar colisión con ladrillos
+function collisionBricks() {
+    for(let r=0; r<brick.row; r++){
+        for(let c=0; c<brick.col; c++){
+            let b = bricks[r][c];
+            if(b.status){
+                if(ball.x > b.x && ball.x < b.x + brick.width &&
+                   ball.y - ball.radius < b.y + brick.height &&
+                   ball.y + ball.radius > b.y){
+                    ball.dy *= -1;
+                    b.status = 0;
+                }
+            }
+        }
+    }
+}
+
+// Comprobar si el nivel se completa
+function checkWin() {
+    let bricksLeft = 0;
+    for(let r=0; r<brick.row; r++){
+        for(let c=0; c<brick.col; c++){
+            if(bricks[r][c].status) bricksLeft++;
+        }
+    }
+    return bricksLeft === 0;
+}
+
 // Movimiento de la pelota
 function moveBall(){
     ball.x += ball.dx;
@@ -91,8 +138,8 @@ function moveBall(){
         ball.dy *= -1;
     }
     if(ball.y + ball.radius > canvas.height){
-        alert("¡Has perdido!");
-        document.location.reload();
+        alert("¡Has perdido! Intenta de nuevo");
+        resetBallAndPaddle();
     }
 
     // Colisión con la pala
@@ -102,18 +149,22 @@ function moveBall(){
         ball.y = paddle.y - ball.radius;
     }
 
-    // Colisión con ladrillos
-    for(let r=0; r<brick.row; r++){
-        for(let c=0; c<brick.col; c++){
-            let b = bricks[r][c];
-            if(b.status){
-                if(ball.x > b.x && ball.x < b.x + brick.width &&
-                   ball.y - ball.radius < b.y + brick.height &&
-                   ball.y + ball.radius > b.y){
-                    ball.dy *= -1;
-                    b.status = 0;
-                }
-            }
+    collisionBricks();
+
+    // Comprobar victoria
+    if(checkWin()){
+        if(level < maxLevels){
+            alert(`¡Nivel ${level} completado!`);
+            level++;
+            ball.speed += 1; // aumentar velocidad en el siguiente nivel
+            resetBallAndPaddle();
+            initBricks();
+        } else {
+            alert("¡Ganaste el juego!");
+            level = 1;
+            ball.speed = 2;
+            resetBallAndPaddle();
+            initBricks();
         }
     }
 }
