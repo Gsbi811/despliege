@@ -6,10 +6,10 @@ const paddleHeight = 15, paddleWidth = 100;
 let paddleX = (canvas.width - paddleWidth) / 2;
 const paddleSpeed = 7;
 
-// Configuración pelota
+// Configuración pelota (se ajusta la posición inicial a la nueva altura)
 let ballRadius = 8;
 let x = canvas.width / 2;
-let y = canvas.height - 30;
+let y = canvas.height - 40;  // antes era -30
 let dx = 4;
 let dy = -4;
 
@@ -19,7 +19,7 @@ const colCount = 10;
 const brickWidth = 70;
 const brickHeight = 20;
 const brickPadding = 10;
-const brickOffsetTop = 50;
+const brickOffsetTop = 30;   // subimos un poco los bloques
 const brickOffsetLeft = 35;
 let bricks = [];
 
@@ -110,13 +110,13 @@ function drawPaddle() {
 function drawScore() {
   ctx.font = "20px Arial";
   ctx.fillStyle = "white";
-  ctx.fillText("Puntuación: " + score, 20, 30);
+  ctx.fillText("Puntuación: " + score, 20, 25);
 }
 
 function drawLives() {
   ctx.font = "20px Arial";
   ctx.fillStyle = "white";
-  ctx.fillText("Vidas: " + lives, canvas.width - 100, 30);
+  ctx.fillText("Vidas: " + lives, canvas.width - 100, 25);
 }
 
 function draw() {
@@ -141,7 +141,7 @@ function draw() {
         document.location.reload();
       } else {
         x = canvas.width / 2;
-        y = canvas.height - 30;
+        y = canvas.height - 40;
         dx = 4;
         dy = -4;
         paddleX = (canvas.width - paddleWidth) / 2;
