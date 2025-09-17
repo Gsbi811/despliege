@@ -1,248 +1,159 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-const scoreElement = document.getElementById('score');
-const livesElement = document.getElementById('lives');
-const levelElement = document.getElementById('level');
+// Configuración jugador
+const paddleHeight = 15, paddleWidth = 100;
+let paddleX = (canvas.width - paddleWidth) / 2;
+const paddleSpeed = 7;
 
-// 🎵 Sonidos
-const soundBounce = document.getElementById('soundBounce');
-const soundBrick = document.getElementById('soundBrick');
-const soundLose = document.getElementById('soundLose');
-const soundWin = document.getElementById('soundWin');
+// Configuración pelota
+let ballRadius = 8;
+let x = canvas.width / 2;
+let y = canvas.height - 30;
+let dx = 4;
+let dy = -4;
 
-// Configuración inicial
-let score = 0;
-let lives = 3;
-let level = 1;
-const maxLevels = 3;
-
-// Pala
-const paddle = {
-    width: 100,
-    height: 10,
-    x: canvas.width / 2 - 50,
-    y: canvas.height - 30,
-    speed: 7,
-    dx: 0
-};
-
-// Pelota
-const ball = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    radius: 8,
-    speed: 2,
-    dx: 2,
-    dy: -2
-};
-
-// Ladrillos
-const brick = {
-    row: 5,
-    col: 8,
-    width: 70,
-    height: 20,
-    padding: 5,
-    offsetTop: 30,
-    offsetLeft: 10
-};
-
+// Configuración bloques
+const rowCount = 5;
+const colCount = 10;
+const brickWidth = 70;
+const brickHeight = 20;
+const brickPadding = 10;
+const brickOffsetTop = 50;
+const brickOffsetLeft = 35;
 let bricks = [];
 
-const brickColors = ["yellow", "orange", "green", "blue", "red"];
-
-function initBricks() {
-    bricks = [];
-    for (let r = 0; r < brick.row; r++) {
-        bricks[r] = [];
-        for (let c = 0; c < brick.col; c++) {
-            bricks[r][c] = { x: 0, y: 0, status: 1, color: brickColors[r] };
-        }
-    }
+for (let c = 0; c < colCount; c++) {
+  bricks[c] = [];
+  for (let r = 0; r < rowCount; r++) {
+    bricks[c][r] = { x: 0, y: 0, status: 1 };
+  }
 }
 
-initBricks();
-
-// Dibujar pala
-function drawPaddle() {
-    ctx.fillStyle = 'cyan';
-    ctx.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
-}
-
-// Dibujar pelota
-function drawBall() {
-    ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    ctx.closePath();
-}
-
-// Dibujar ladrillos
-function drawBricks() {
-    for (let r = 0; r < brick.row; r++) {
-        for (let c = 0; c < brick.col; c++) {
-            if (bricks[r][c].status) {
-                let brickX = c * (brick.width + brick.padding) + brick.offsetLeft;
-                let brickY = r * (brick.height + brick.padding) + brick.offsetTop;
-                bricks[r][c].x = brickX;
-                bricks[r][c].y = brickY;
-                ctx.fillStyle = bricks[r][c].color;
-                ctx.fillRect(brickX, brickY, brick.width, brick.height);
-            }
-        }
-    }
-}
-
-// Mover pala
-function movePaddle() {
-    paddle.x += paddle.dx;
-    if (paddle.x < 0) paddle.x = 0;
-    if (paddle.x + paddle.width > canvas.width) paddle.x = canvas.width - paddle.width;
-}
-
-// Reiniciar bola y pala
-function resetBallAndPaddle() {
-    ball.x = canvas.width / 2;
-    ball.y = canvas.height / 2;
-    ball.dx = ball.speed;
-    ball.dy = -ball.speed;
-    paddle.x = canvas.width / 2 - paddle.width / 2;
-}
-
-// Colisión con ladrillos
-function collisionBricks() {
-    for (let r = 0; r < brick.row; r++) {
-        for (let c = 0; c < brick.col; c++) {
-            let b = bricks[r][c];
-            if (b.status) {
-                if (
-                    ball.x > b.x &&
-                    ball.x < b.x + brick.width &&
-                    ball.y - ball.radius < b.y + brick.height &&
-                    ball.y + ball.radius > b.y
-                ) {
-                    ball.dy *= -1;
-                    b.status = 0;
-                    score += 10;
-                    scoreElement.textContent = `Puntuación: ${score}`;
-                    soundBrick.currentTime = 0;
-                    soundBrick.play();
-                }
-            }
-        }
-    }
-}
-
-// Comprobar victoria
-function checkWin() {
-    let bricksLeft = 0;
-    for (let r = 0; r < brick.row; r++) {
-        for (let c = 0; c < brick.col; c++) {
-            if (bricks[r][c].status) bricksLeft++;
-        }
-    }
-    return bricksLeft === 0;
-}
-
-// Mover bola
-function moveBall() {
-    ball.x += ball.dx;
-    ball.y += ball.dy;
-
-    // Paredes
-    if (ball.x + ball.radius > canvas.width || ball.x - ball.radius < 0) {
-        ball.dx *= -1;
-        soundBounce.currentTime = 0;
-        soundBounce.play();
-    }
-    if (ball.y - ball.radius < 0) {
-        ball.dy *= -1;
-        soundBounce.currentTime = 0;
-        soundBounce.play();
-    }
-
-    // Fondo
-    if (ball.y + ball.radius > canvas.height) {
-        lives--;
-        livesElement.textContent = `Vidas: ${lives}`;
-        soundLose.currentTime = 0;
-        soundLose.play();
-
-        if (lives === 0) {
-            alert("¡Has perdido todas las vidas!");
-            lives = 3;
-            level = 1;
-            score = 0;
-            ball.speed = 2;
-            scoreElement.textContent = `Puntuación: ${score}`;
-            livesElement.textContent = `Vidas: ${lives}`;
-            levelElement.textContent = `Nivel: ${level}`;
-            initBricks();
-        }
-        resetBallAndPaddle();
-        initBricks();
-    }
-
-    // Pala
-    if (
-        ball.x > paddle.x &&
-        ball.x < paddle.x + paddle.width &&
-        ball.y + ball.radius > paddle.y
-    ) {
-        ball.dy *= -1;
-        ball.y = paddle.y - ball.radius;
-        soundBounce.currentTime = 0;
-        soundBounce.play();
-    }
-
-    collisionBricks();
-
-    // Ganar nivel
-    if (checkWin()) {
-        if (level < maxLevels) {
-            alert(`¡Nivel ${level} completado!`);
-            level++;
-            ball.speed += 1;
-            levelElement.textContent = `Nivel: ${level}`;
-            resetBallAndPaddle();
-            initBricks();
-            soundWin.currentTime = 0;
-            soundWin.play();
-        } else {
-            alert("¡Ganaste el juego!");
-            level = 1;
-            ball.speed = 2;
-            resetBallAndPaddle();
-            initBricks();
-            score = 0;
-            scoreElement.textContent = `Puntuación: ${score}`;
-            levelElement.textContent = `Nivel: ${level}`;
-            soundWin.currentTime = 0;
-            soundWin.play();
-        }
-    }
-}
-
-// Dibujar todo
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawPaddle();
-    drawBall();
-    drawBricks();
-    movePaddle();
-    moveBall();
-    requestAnimationFrame(draw);
-}
+// Vidas y puntuación
+let score = 0;
+let lives = 3;
 
 // Controles
-document.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") paddle.dx = paddle.speed;
-    if (e.key === "ArrowLeft") paddle.dx = -paddle.speed;
-});
-document.addEventListener("keyup", (e) => {
-    if (e.key === "ArrowRight" || e.key === "ArrowLeft") paddle.dx = 0;
-});
+let rightPressed = false;
+let leftPressed = false;
+document.addEventListener("keydown", keyDownHandler);
+document.addEventListener("keyup", keyUpHandler);
+
+function keyDownHandler(e) {
+  if (e.key === "ArrowRight") rightPressed = true;
+  else if (e.key === "ArrowLeft") leftPressed = true;
+}
+
+function keyUpHandler(e) {
+  if (e.key === "ArrowRight") rightPressed = false;
+  else if (e.key === "ArrowLeft") leftPressed = false;
+}
+
+// Colisiones con bloques
+function collisionDetection() {
+  for (let c = 0; c < colCount; c++) {
+    for (let r = 0; r < rowCount; r++) {
+      let b = bricks[c][r];
+      if (b.status === 1) {
+        if (
+          x > b.x &&
+          x < b.x + brickWidth &&
+          y > b.y &&
+          y < b.y + brickHeight
+        ) {
+          dy = -dy;
+          b.status = 0;
+          score += 10;
+          if (score === rowCount * colCount * 10) {
+            alert("¡Ganaste! Puntuación: " + score);
+            document.location.reload();
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dibujar bloques (ahora sin colores, todos blancos)
+function drawBricks() {
+  for (let c = 0; c < colCount; c++) {
+    for (let r = 0; r < rowCount; r++) {
+      if (bricks[c][r].status === 1) {
+        let brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+        let brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+        bricks[c][r].x = brickX;
+        bricks[c][r].y = brickY;
+        ctx.strokeStyle = "white"; // solo borde blanco
+        ctx.strokeRect(brickX, brickY, brickWidth, brickHeight);
+      }
+    }
+  }
+}
+
+function drawBall() {
+  ctx.beginPath();
+  ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
+  ctx.fillStyle = "white";
+  ctx.fill();
+  ctx.closePath();
+}
+
+function drawPaddle() {
+  ctx.fillStyle = "white";
+  ctx.fillRect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight);
+}
+
+function drawScore() {
+  ctx.font = "20px Arial";
+  ctx.fillStyle = "white";
+  ctx.fillText("Puntuación: " + score, 20, 30);
+}
+
+function drawLives() {
+  ctx.font = "20px Arial";
+  ctx.fillStyle = "white";
+  ctx.fillText("Vidas: " + lives, canvas.width - 100, 30);
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBricks();
+  drawBall();
+  drawPaddle();
+  drawScore();
+  drawLives();
+  collisionDetection();
+
+  // Rebotes
+  if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) dx = -dx;
+  if (y + dy < ballRadius) dy = -dy;
+  else if (y + dy > canvas.height - ballRadius - paddleHeight - 10) {
+    if (x > paddleX && x < paddleX + paddleWidth) {
+      dy = -dy;
+    } else if (y + dy > canvas.height - ballRadius) {
+      lives--;
+      if (!lives) {
+        alert("Game Over. Puntuación: " + score);
+        document.location.reload();
+      } else {
+        x = canvas.width / 2;
+        y = canvas.height - 30;
+        dx = 4;
+        dy = -4;
+        paddleX = (canvas.width - paddleWidth) / 2;
+      }
+    }
+  }
+
+  x += dx;
+  y += dy;
+
+  // Movimiento del jugador
+  if (rightPressed && paddleX < canvas.width - paddleWidth) paddleX += paddleSpeed;
+  else if (leftPressed && paddleX > 0) paddleX -= paddleSpeed;
+
+  requestAnimationFrame(draw);
+}
 
 draw();
