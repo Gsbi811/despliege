@@ -23,10 +23,13 @@ const brickOffsetTop = 50;
 const brickOffsetLeft = 35;
 let bricks = [];
 
+// Paleta de colores para las filas de bloques
+const colors = ["red", "orange", "yellow", "lime", "cyan"];
+
 for (let c = 0; c < colCount; c++) {
   bricks[c] = [];
   for (let r = 0; r < rowCount; r++) {
-    bricks[c][r] = { x: 0, y: 0, status: 1 };
+    bricks[c][r] = { x: 0, y: 0, status: 1, color: colors[r % colors.length] };
   }
 }
 
@@ -75,7 +78,7 @@ function collisionDetection() {
   }
 }
 
-// Dibujar bloques (ahora sin colores, todos blancos)
+// Dibujar bloques con colores
 function drawBricks() {
   for (let c = 0; c < colCount; c++) {
     for (let r = 0; r < rowCount; r++) {
@@ -84,8 +87,8 @@ function drawBricks() {
         let brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
         bricks[c][r].x = brickX;
         bricks[c][r].y = brickY;
-        ctx.strokeStyle = "white"; // solo borde blanco
-        ctx.strokeRect(brickX, brickY, brickWidth, brickHeight);
+        ctx.fillStyle = bricks[c][r].color;
+        ctx.fillRect(brickX, brickY, brickWidth, brickHeight);
       }
     }
   }
@@ -94,13 +97,13 @@ function drawBricks() {
 function drawBall() {
   ctx.beginPath();
   ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
-  ctx.fillStyle = "white";
+  ctx.fillStyle = "red";
   ctx.fill();
   ctx.closePath();
 }
 
 function drawPaddle() {
-  ctx.fillStyle = "white";
+  ctx.fillStyle = "blue";
   ctx.fillRect(paddleX, canvas.height - paddleHeight - 10, paddleWidth, paddleHeight);
 }
 
